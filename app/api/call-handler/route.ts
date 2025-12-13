@@ -10,8 +10,6 @@ export async function POST(request: Request) {
     const speechResult = formData.get("SpeechResult") as string | null;
     const callStatus = formData.get("CallStatus") as string;
     
-    const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
-    const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
     const baseUrl =
@@ -28,7 +26,7 @@ export async function POST(request: Request) {
 
     const twilioResponse = new twilio.twiml.VoiceResponse();
 
-    if (!twilioAccountSid || !twilioAuthToken || !openaiApiKey) {
+    if (!openaiApiKey) {
       twilioResponse.say(
         { voice: "alice" },
         "This demo is not configured yet. Missing required API keys on the server. Please contact the site owner."

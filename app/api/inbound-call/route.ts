@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import twilio from "twilio";
 
 // Twilio webhook for inbound calls to your Twilio phone number.
-// Configure in Twilio Console: Phone Numbers → (your number) → "A CALL COMES IN"
+// Configure in Twilio Console: Phone Numbers → (your number) → "A CALL COMES IN" → Webhook (POST)
 export async function POST(request: Request) {
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||
@@ -18,7 +18,6 @@ export async function POST(request: Request) {
 
   const twilioResponse = new twilio.twiml.VoiceResponse();
 
-  // Quick sanity check to avoid a silent failure if the site isn't configured.
   if (!process.env.OPENAI_API_KEY) {
     twilioResponse.say(
       { voice: "alice" },
@@ -36,7 +35,6 @@ export async function POST(request: Request) {
     "Hello, thanks for calling Omriq. How can I help you today?"
   );
 
-  // Gather speech and send it to the AI handler
   twilioResponse.gather({
     input: ["speech"] as any,
     speechTimeout: "auto",
