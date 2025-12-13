@@ -28,14 +28,20 @@ export async function POST(request: Request) {
     // Check required API keys
     const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
     const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+    const twilioApiKeySid = process.env.TWILIO_API_KEY_SID;
+    const twilioApiKeySecret = process.env.TWILIO_API_KEY_SECRET;
     const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
-    if (!twilioAccountSid || !twilioAuthToken || !twilioPhoneNumber) {
+    const hasAuthTokenCreds = !!(twilioAccountSid && twilioAuthToken);
+    const hasApiKeyCreds = !!(twilioAccountSid && twilioApiKeySid && twilioApiKeySecret);
+
+    if (!twilioAccountSid || !twilioPhoneNumber || (!hasAuthTokenCreds && !hasApiKeyCreds)) {
       return NextResponse.json(
         { 
           success: false, 
-          error: "Twilio not configured. Please set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER environment variables.",
+          error:
+            "Twilio not configured. Set TWILIO_ACCOUNT_SID + TWILIO_PHONE_NUMBER and either (TWILIO_AUTH_TOKEN) or (TWILIO_API_KEY_SID + TWILIO_API_KEY_SECRET).",
           setupRequired: true
         },
         { status: 500 }
@@ -60,8 +66,10 @@ export async function POST(request: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL 
       || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
-    // Initialize Twilio client
-    const client = twilio(twilioAccountSid, twilioAuthToken);
+    // Initialize Twilio client (prefer API Key auth if provided)
+    const client = hasApiKeyCreds
+      ? twilio(twilioApiKeySid!, twilioApiKeySecret!, { accountSid: twilioAccountSid })
+      : twilio(twilioAccountSid!, twilioAuthToken!);
 
     // Initialize OpenAI client
     const openai = new OpenAI({

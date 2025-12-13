@@ -5,9 +5,19 @@ This project uses several server-side environment variables for the calling demo
 ## Required (Call Demo)
 
 - `TWILIO_ACCOUNT_SID`
-- `TWILIO_AUTH_TOKEN`
 - `TWILIO_PHONE_NUMBER`
 - `OPENAI_API_KEY`
+
+## Twilio authentication (choose ONE option)
+
+### Option A (recommended): API Key
+
+- `TWILIO_API_KEY_SID`
+- `TWILIO_API_KEY_SECRET`
+
+### Option B: Auth Token
+
+- `TWILIO_AUTH_TOKEN`
 
 ## Recommended (Twilio webhook reliability)
 
