@@ -29,7 +29,6 @@ export async function POST(request: Request) {
     const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
     const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
     const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
-    const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
     if (!twilioAccountSid || !twilioAuthToken || !twilioPhoneNumber) {
@@ -37,17 +36,6 @@ export async function POST(request: Request) {
         { 
           success: false, 
           error: "Twilio not configured. Please set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER environment variables.",
-          setupRequired: true
-        },
-        { status: 500 }
-      );
-    }
-
-    if (!elevenLabsApiKey) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: "ElevenLabs not configured. Please set ELEVENLABS_API_KEY environment variable.",
           setupRequired: true
         },
         { status: 500 }

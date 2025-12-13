@@ -7,7 +7,6 @@ This project uses several server-side environment variables for the calling demo
 - `TWILIO_ACCOUNT_SID`
 - `TWILIO_AUTH_TOKEN`
 - `TWILIO_PHONE_NUMBER`
-- `ELEVENLABS_API_KEY`
 - `OPENAI_API_KEY`
 
 ## Recommended (Twilio webhook reliability)

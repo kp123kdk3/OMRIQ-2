@@ -12,7 +12,6 @@ export async function POST(request: Request) {
     
     const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
     const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-    const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY;
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
     const baseUrl =
@@ -29,7 +28,7 @@ export async function POST(request: Request) {
 
     const twilioResponse = new twilio.twiml.VoiceResponse();
 
-    if (!twilioAccountSid || !twilioAuthToken || !elevenLabsApiKey || !openaiApiKey) {
+    if (!twilioAccountSid || !twilioAuthToken || !openaiApiKey) {
       twilioResponse.say(
         { voice: "alice" },
         "This demo is not configured yet. Missing required API keys on the server. Please contact the site owner."
@@ -76,7 +75,7 @@ When answering questions, be natural and conversational. Show enthusiasm about t
       const openai = new OpenAI({ apiKey: openaiApiKey });
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: "The call just started. Say the greeting from the hotel AI concierge." }
@@ -87,33 +86,8 @@ When answering questions, be natural and conversational. Show enthusiasm about t
 
       const greetingText = completion.choices[0].message.content || omriqHotelInfo.aiGreeting;
 
-      // Use ElevenLabs to convert text to speech
-      // Voice ID: 21m00Tcm4TlvDq8ikWAM (Rachel - natural female voice)
-      const elevenLabsResponse = await fetch("https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM", {
-        method: "POST",
-        headers: {
-          "Accept": "audio/mpeg",
-          "Content-Type": "application/json",
-          "xi-api-key": elevenLabsApiKey,
-        },
-        body: JSON.stringify({
-          text: greetingText,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-          },
-        }),
-      });
-
-      if (elevenLabsResponse.ok) {
-        const audioBuffer = await elevenLabsResponse.arrayBuffer();
-        // We need to host this audio or use Twilio's media streaming
-        // For now, use Twilio's built-in speech for simplicity
-        twilioResponse.say({ voice: "alice" }, greetingText);
-      } else {
-        twilioResponse.say({ voice: "alice" }, greetingText);
-      }
+      // Speak greeting using Twilio's built-in TTS (fastest/most reliable v1)
+      twilioResponse.say({ voice: "alice" }, greetingText);
 
       // Gather user input
       twilioResponse.gather({
@@ -128,7 +102,7 @@ When answering questions, be natural and conversational. Show enthusiasm about t
       const openai = new OpenAI({ apiKey: openaiApiKey });
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: speechResult }
@@ -139,33 +113,8 @@ When answering questions, be natural and conversational. Show enthusiasm about t
 
       const responseText = completion.choices[0].message.content || "I'm sorry, could you repeat that?";
 
-      // Use ElevenLabs for voice
-      try {
-        const elevenLabsResponse = await fetch("https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM", {
-          method: "POST",
-          headers: {
-            "Accept": "audio/mpeg",
-            "Content-Type": "application/json",
-            "xi-api-key": elevenLabsApiKey,
-          },
-          body: JSON.stringify({
-            text: responseText,
-            model_id: "eleven_multilingual_v2",
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.75,
-            },
-          }),
-        });
-
-        // For Twilio, we'd need to stream the audio
-        // For simplicity, using Twilio's built-in TTS for now
-        // In production, you'd use Twilio Media Streams with WebSocket for real-time audio
-        twilioResponse.say({ voice: "alice" }, responseText);
-      } catch (error) {
-        // Fallback to Twilio TTS
-        twilioResponse.say({ voice: "alice" }, responseText);
-      }
+      // Speak response using Twilio's built-in TTS (fastest/most reliable v1)
+      twilioResponse.say({ voice: "alice" }, responseText);
 
       // Continue gathering input
       twilioResponse.gather({
