@@ -65,9 +65,18 @@ export async function POST(request: Request) {
     // Import hotel information
     const { omriqHotelInfo } = await import("@/lib/hotel-info");
 
-    // Get base URL for webhooks (use environment variable or default)
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL 
-      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+    // Get base URL for webhooks (prefer explicit config; otherwise infer from request)
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+      (() => {
+        const proto = request.headers.get("x-forwarded-proto") || "http";
+        const host =
+          request.headers.get("x-forwarded-host") ||
+          request.headers.get("host") ||
+          "localhost:3000";
+        return `${proto}://${host}`;
+      })();
 
     // Initialize Twilio client (prefer API Key auth if provided)
     const client = hasApiKeyCreds
