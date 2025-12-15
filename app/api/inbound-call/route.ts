@@ -30,10 +30,16 @@ export async function POST(request: Request) {
     });
   }
 
-  twilioResponse.say(
-    { voice: "alice" },
-    "Hello, thanks for calling Omriq. How can I help you today?"
-  );
+  if (process.env.ELEVENLABS_API_KEY) {
+    // Prefer ElevenLabs audio when configured
+    const greeting = "Hello, thanks for calling Omriq. How can I help you today?";
+    twilioResponse.play(`${baseUrl}/api/tts?text=${encodeURIComponent(greeting)}`);
+  } else {
+    twilioResponse.say(
+      { voice: "alice" },
+      "Hello, thanks for calling Omriq. How can I help you today?"
+    );
+  }
 
   twilioResponse.gather({
     input: ["speech"] as any,

@@ -10,6 +10,7 @@ export async function POST(request: Request) {
     const speechResult = formData.get("SpeechResult") as string | null;
     const callStatus = formData.get("CallStatus") as string;
     
+    // Do NOT hardcode secrets in source control.
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
     const baseUrl =
@@ -25,6 +26,7 @@ export async function POST(request: Request) {
       })();
 
     const twilioResponse = new twilio.twiml.VoiceResponse();
+    const elevenLabsEnabled = !!process.env.ELEVENLABS_API_KEY;
 
     if (!openaiApiKey) {
       twilioResponse.say(
@@ -84,8 +86,14 @@ When answering questions, be natural and conversational. Show enthusiasm about t
 
       const greetingText = completion.choices[0].message.content || omriqHotelInfo.aiGreeting;
 
-      // Speak greeting using Twilio's built-in TTS (fastest/most reliable v1)
-      twilioResponse.say({ voice: "alice" }, greetingText);
+      if (elevenLabsEnabled) {
+        twilioResponse.play(
+          `${baseUrl}/api/tts?text=${encodeURIComponent(greetingText)}`
+        );
+      } else {
+        // Twilio's built-in TTS fallback
+        twilioResponse.say({ voice: "alice" }, greetingText);
+      }
 
       // Gather user input
       twilioResponse.gather({
@@ -111,8 +119,14 @@ When answering questions, be natural and conversational. Show enthusiasm about t
 
       const responseText = completion.choices[0].message.content || "I'm sorry, could you repeat that?";
 
-      // Speak response using Twilio's built-in TTS (fastest/most reliable v1)
-      twilioResponse.say({ voice: "alice" }, responseText);
+      if (elevenLabsEnabled) {
+        twilioResponse.play(
+          `${baseUrl}/api/tts?text=${encodeURIComponent(responseText)}`
+        );
+      } else {
+        // Twilio's built-in TTS fallback
+        twilioResponse.say({ voice: "alice" }, responseText);
+      }
 
       // Continue gathering input
       twilioResponse.gather({
@@ -124,10 +138,20 @@ When answering questions, be natural and conversational. Show enthusiasm about t
       });
 
       // If no input after timeout, say goodbye
-      twilioResponse.say({ voice: "alice" }, "Thank you for calling Omriq Luxury Hotel. Have a wonderful day!");
+      const goodbye = "Thank you for calling Omriq Luxury Hotel. Have a wonderful day!";
+      if (elevenLabsEnabled) {
+        twilioResponse.play(`${baseUrl}/api/tts?text=${encodeURIComponent(goodbye)}`);
+      } else {
+        twilioResponse.say({ voice: "alice" }, goodbye);
+      }
     } else {
       // End call
-      twilioResponse.say({ voice: "alice" }, "Thank you for calling. Goodbye!");
+      const goodbye = "Thank you for calling. Goodbye!";
+      if (elevenLabsEnabled) {
+        twilioResponse.play(`${baseUrl}/api/tts?text=${encodeURIComponent(goodbye)}`);
+      } else {
+        twilioResponse.say({ voice: "alice" }, goodbye);
+      }
       twilioResponse.hangup();
     }
 

@@ -39,21 +39,26 @@ Vapi.ai is a purpose-built platform for AI voice calls. It's the easiest to set 
    ```bash
    npm install
    ```
-   (Already added: twilio, openai, elevenlabs)
+   (Already added: twilio, openai)
 
 5. **Configure Environment Variables:**
    - Update your `.env.local` file:
      ```env
      # Twilio Configuration
-     TWILIO_ACCOUNT_SID=your_account_sid_here
-     TWILIO_AUTH_TOKEN=your_auth_token_here
-     TWILIO_PHONE_NUMBER=+1234567890
+     # IMPORTANT: Never commit real secrets into markdown or source control.
+     TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+     TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+     # Use E.164 format (no spaces/parentheses)
+     TWILIO_PHONE_NUMBER=+15551234567
      
-     # ElevenLabs Configuration
-     ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
-     
+    # ElevenLabs Configuration (optional, but recommended for best voice)
+
+    ELEVENLABS_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+    # Optional: pick a specific ElevenLabs voice (defaults to "Rachel")
+    ELEVENLABS_VOICE_ID=21m00Tcm4TlvDq8ikWAM
      # OpenAI Configuration
-     OPENAI_API_KEY=your_openai_api_key_here
+     OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
      
      # Base URL for webhooks (use your deployed URL or ngrok for local testing)
      NEXT_PUBLIC_BASE_URL=https://your-domain.com
@@ -64,6 +69,7 @@ Vapi.ai is a purpose-built platform for AI voice calls. It's the easiest to set 
    - The webhooks need to be publicly accessible
    - Use [ngrok](https://ngrok.com) to expose your local server:
      ```bash
+     # Use the port your dev server is running on (3000 or 3001, etc.)
      ngrok http 3000
      ```
    - Use the ngrok URL in `NEXT_PUBLIC_BASE_URL`
@@ -78,7 +84,7 @@ Vapi.ai is a purpose-built platform for AI voice calls. It's the easiest to set 
 2. Twilio calls the number → Connects to webhook handler
 3. Webhook uses OpenAI → Generates conversational responses
 4. ElevenLabs converts text → High-quality AI voice
-5. Twilio streams audio → Visitor hears natural AI voice
+5. Twilio plays the generated MP3 → Visitor hears natural AI voice
 
 ---
 

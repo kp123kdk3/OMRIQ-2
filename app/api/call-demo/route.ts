@@ -25,12 +25,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check required API keys
+    // Check required API keys (do not hardcode secrets in source control)
     const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
+    const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+    // Twilio auth (choose ONE).
     const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
     const twilioApiKeySid = process.env.TWILIO_API_KEY_SID;
     const twilioApiKeySecret = process.env.TWILIO_API_KEY_SECRET;
-    const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
     const hasAuthTokenCreds = !!(twilioAccountSid && twilioAuthToken);
