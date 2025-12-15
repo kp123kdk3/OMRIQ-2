@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
 import twilio from "twilio";
-
-// Twilio webhook for inbound calls to your Twilio phone number.
-// Configure in Twilio Console: Phone Numbers → (your number) → "A CALL COMES IN" → Webhook (POST)
 export async function POST(request: Request) {
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ||

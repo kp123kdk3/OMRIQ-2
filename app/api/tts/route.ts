@@ -1,16 +1,5 @@
 import { NextResponse } from "next/server";
 
-// ElevenLabs TTS proxy for Twilio <Play>.
-// Twilio will GET this URL and expects audio bytes back (e.g. audio/mpeg).
-//
-// Required env:
-//
-//
-// Optional env:
-// - ELEVENLABS_VOICE_ID (defaults to "Rachel")
-//
-// Query params:
-// - text: string (required)
 export async function GET(request: Request) {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey) {
@@ -33,7 +22,7 @@ export async function GET(request: Request) {
     );
   }
 
-  // Basic guardrails: keep Twilio URL short + avoid runaway cost.
+  // Guardrail: keep Twilio URL short + avoid runaway cost.
   if (text.length > 600) {
     return NextResponse.json(
       {
@@ -45,11 +34,8 @@ export async function GET(request: Request) {
   }
 
   // Default to a widely available ElevenLabs voice ("Rachel").
-  // You can override with ELEVENLABS_VOICE_ID.
   const voiceId = process.env.ELEVENLABS_VOICE_ID || "21m00Tcm4TlvDq8ikWAM";
 
-  // ElevenLabs API: Text to Speech
-  // Docs: https://docs.elevenlabs.io/
   const elevenUrl = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
 
   const elevenRes = await fetch(elevenUrl, {

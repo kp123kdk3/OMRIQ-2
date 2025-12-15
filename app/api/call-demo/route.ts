@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate phone number format (basic validation)
+    // Validate phone number format
     const phoneRegex = /^\+?[1-9]\d{1,14}$/;
     const cleanedPhone = phoneNumber.replace(/[\s\-\(\)]/g, "");
     
@@ -25,11 +25,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check required API keys (do not hardcode secrets in source control)
+    // Required env
     const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
     const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
-    // Twilio auth (choose ONE).
+    // Twilio auth (choose one)
     const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
     const twilioApiKeySid = process.env.TWILIO_API_KEY_SID;
     const twilioApiKeySecret = process.env.TWILIO_API_KEY_SECRET;
@@ -62,10 +62,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Import hotel information
     const { omriqHotelInfo } = await import("@/lib/hotel-info");
 
-    // Get base URL for webhooks (prefer explicit config; otherwise infer from request)
+    // Base URL for webhook callbacks
     const baseUrl =
       process.env.NEXT_PUBLIC_BASE_URL ||
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
@@ -78,29 +77,23 @@ export async function POST(request: Request) {
         return `${proto}://${host}`;
       })();
 
-    // Initialize Twilio client (prefer API Key auth if provided)
     const client = hasApiKeyCreds
       ? twilio(twilioApiKeySid!, twilioApiKeySecret!, { accountSid: twilioAccountSid })
       : twilio(twilioAccountSid!, twilioAuthToken!);
 
-    // Initialize OpenAI client
     const openai = new OpenAI({
       apiKey: openaiApiKey,
     });
 
-    // Create the call using Twilio
-    // The webhook will handle the conversation
     const call = await client.calls.create({
       to: cleanedPhone,
       from: twilioPhoneNumber,
-      url: `${baseUrl}/api/call-handler`, // Webhook URL for handling the call
+      url: `${baseUrl}/api/call-handler`,
       method: "POST",
-      statusCallback: `${baseUrl}/api/call-status`, // Optional: track call status
+      statusCallback: `${baseUrl}/api/call-status`,
       statusCallbackEvent: ["completed", "failed"],
     });
 
-    // Store call context (in production, use a database)
-    // For now, we'll pass context via the webhook
     console.log("Call initiated:", {
       callSid: call.sid,
       phoneNumber: cleanedPhone,

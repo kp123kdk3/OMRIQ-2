@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import twilio from "twilio";
 import OpenAI from "openai";
-
-// This handles the Twilio webhook for incoming call events
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -10,7 +8,6 @@ export async function POST(request: Request) {
     const speechResult = formData.get("SpeechResult") as string | null;
     const callStatus = formData.get("CallStatus") as string;
     
-    // Do NOT hardcode secrets in source control.
     const openaiApiKey = process.env.OPENAI_API_KEY;
 
     const baseUrl =
